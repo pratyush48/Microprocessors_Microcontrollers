@@ -1,0 +1,175 @@
+//  This code contains many subroutines [That I will be mentioning].
+// Program Memory has Read, Store, Display.
+// Data Memory has ASCII and the next location has the respective Hex value.  
+// NEXT has Hex value as 14.
+// ESC has Hex value as 1F.
+// A is Accumulator.
+// R1 - R7 are all registers.
+
+// Read Staring of the program.
+// Begining of the Program from 9000h.
+    74 00  		// Sets A to 0.
+	F8			// Moving value of A to R0.
+	F9			// Moving value of A to R1.
+	FA			// Moving value of A to R2.	
+	FB			// Moving value of A to R3.
+	FC			// Moving value of A to R4.
+	FD			// Moving value of A to R5.
+	FE			// Moving value of A to R6.
+	B4 14 03	// Conditional Jump by 3 if keyboard input is not NEXT.
+	12 B0 00	// If the keyboard input is NEXT, it calls the Store subroutine.
+	B4 1F 05	// Conditional Jump by 3 if keyboard input is not EXEC. 
+	12 80 50 	// If the keyboard input is EXEC, it calls the Display subroutine.
+	80 E9		// Jumping to the start of the program.E9 is the offset.
+	E9			// Moving value of R1 to A. 
+	FA			// Moving value of A to R2.
+	E8			// Moving value of R1 to A. 
+	F9			// Moving value of A to R1.
+	12 02 A2	// Getting input from the keyboard.
+	F8			// Moving value of A to R0.
+	80 DC	// Looping back to the first conditional jump.
+
+// Store Subroutine:
+// Starting of the Store subroutine B000h.
+	ED			// Moving value of R5 to A. 
+	FE			// Moving value of A to R6.
+	EC			// Moving value of R4 to A.
+	FD			// Moving value of A to R5.
+	EB			// Moving value of R3 to A.
+	FC			// Moving value of A to R4.
+	EA			// Moving value of R2 to A.
+	C4			// Swapping lower nibble of A with higher nibble of A.
+	49			// OR of R1 and A.
+	FF			// Moving value of A to R7.
+	12 D0 00	// Calling the Look-up-table subroutine.
+	FB			// Moving value of A to R3.
+	22			// Return.
+
+// Starting of Look-up table subroutine.
+// D000:	
+    90 C0 00	// Moving the DPTR to the start of the lookup table. Which is in data memory.
+	A3			// Incrementing DPTR.
+	A3			// Incrementing DPTR.
+	E5 82		// Moving the lower nibble of DPTR to A.
+	B4 64 03	// Comparing A with 64H. If the value is not equal, it jumps by 3.
+	74 90		// Moving 90h to A. 
+	22			// Return.									
+	E0			// Moving data pointed by data pointer in to A.
+	B5 07 F2	// Checking if the value at A and the value at R7 are the same. If the value is same, the next lines are executed. If it is not same, the PC is jumping back by 15H. Basically iterating through the list of ASCII value to find a match.
+	A3			// Incrementing DPTR.
+	E0			// Moving data pointed by data pointer in to A.
+	22			// Return
+
+// Begining of Display subroutine.
+// Displays all the 4 values on monitor.
+// 8050:	
+    12 B0 00	// Calling the Store subroutine.
+	90 EC 01	// Data pointer pointing to EC01.
+	74 90		// Moving 90h to A.
+	F0			// Data at data pointer is 90h.
+	90 EC 00	// Data pointer pointing to EC00.
+	EE 			// Moving data at R6 to A.	
+	F0			// Data at data pointer is 91h.	
+	90 EC 01	// Data pointer pointing to EC01.	
+	74 91		// Moving 91h to A.	
+	F0			// Data at data pointer is 92h.	
+	90 EC 00	// Data pointer pointing to EC00.	
+	ED 			// Moving data at R5 to A.		
+	F0			// Data at data pointer is 92h.	
+	90 EC 01	// Data pointer pointing to EC01.
+	74 92		// Moving 92h to A.
+	F0			// Data at data pointer is 93h.
+	90 EC 00	// Data pointer pointing to EC00.
+	EC 			// Moving data at R4 to A.
+	F0			// Data at data pointer is 93h.
+	90 EC 01	// Data pointer pointing to EC01.
+	74 93		// Moving 93h to A.
+	F0			// Data at data pointer is 90h.
+	90 EC 00	// Data pointer pointing to EC00.
+	EB 			// Moving data at R3 to A.	
+	F0			// Data at data pointer is 90h.
+	22	// Initiating the code for new input
+
+
+
+// In the Data Memory.
+// We built the lookup table such that if address N has the ASCII code of a partiular character, the address N+1 has the 7-segment display code of that character. Whenever we find the particular ASCII we just increment it once to get the Hex code.
+// These are the ASCII values we thought that will be logical to print on the monitor. Rest all will be displaying the error Hex code.
+
+// C002:
+	28
+	00 /* (space) */	
+	30
+	22 /* " */			      
+	35
+	02 /* ' */			     
+	10
+	01 /* , */			      
+	41
+	04 /* - */			      
+	42
+	08, /* . */			      
+	44
+	F3 /* 0 */			      
+	45
+	60 /* 1 */			      
+	46
+	B5 /* 2 */			      
+	47
+	F4 /* 3 */			      
+	48
+	66 /* 4 */			      
+	49
+	D6 /* 5 */			      
+	50
+	D7 /* 6 */			      
+	51
+	70 /* 7 */			      
+	52
+	F7 /* 8 */			      
+	53
+	F6 /* 9 */			      
+	57
+	84 /* = */			      
+	59
+	3D /* ? */			      
+	61
+	77 /* A */			      
+	63
+	93 /* C */			      
+	65
+	97 /* E */			      
+	66
+	17 /* F */			      
+	67
+	D3 /* G */			      
+	68
+	67 /* H */			      
+	70
+	E1 /* J */			      
+	72
+	83 /* L */			      
+	75
+	F3 /* O */			      
+	76
+	37 /* P */			      
+	79
+	D6 /* S */			      
+	81
+	E3 /* U */			      
+	85
+	E6 /* Y */			      
+	91
+	80 /* _ */			      
+	93
+	F5, /* a */			     
+	94
+	C7, /* b */			      
+	95
+	85, /* c */			      
+	96
+	E5, /* d */			      
+	97
+	B7, /* e */			      
+	98
+	F6, /* g */			
